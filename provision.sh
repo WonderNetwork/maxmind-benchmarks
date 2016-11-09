@@ -3,7 +3,7 @@
 set -e
 
 # install deps
-apt-get install -y build-essential apache2 php5 php5-dev siege php-pear build-essential autoconf libtool apache2-threaded-dev
+apt-get install -y build-essential apache2 php5 php5-dev siege php-pear build-essential autoconf libtool apache2-threaded-dev curl
 
 # link apache configs
 ln -sf /vagrant/mpm-prefork.conf /etc/apache2/conf.d/mpm-prefork.conf
@@ -11,6 +11,13 @@ ln -sf /vagrant/apache.maxmind /etc/apache2/sites-enabled/apache.maxmind
 ln -sf /vagrant/phplib.maxmind /etc/apache2/sites-enabled/phplib.maxmind
 ln -sf /vagrant/phpext.maxmind /etc/apache2/sites-enabled/phpext.maxmind
 ln -sf /vagrant/vanilla.maxmind /etc/apache2/sites-enabled/vanilla.maxmind
+
+# link php config
+ln -sf /vagrant/opcache.ini /etc/php5/conf.d/10-opcache.ini
+
+# make sure any pre-existing geoip php extension is disabled, or it'll break
+# composer
+rm -f /etc/php5/conf.d/10-geoip.ini
 
 # get the maxmind geoip database
 rm -rf geoipcountry.dat
@@ -40,16 +47,14 @@ cd ..
 # get the php geoip module from pecl
 pecl install -s geoip || true
 
+# get composer
+wget -O composer-installer https://getcomposer.org/installer
+php composer-installer --install-dir=/usr/local/bin --filename=composer --version=1.1.3
+
 # install the geoip library (before we actually enable the extension, because
 # that makes it break)
 cd /vagrant
 composer install -o
-
-# link php configs
-ln -sf /vagrant/opcache.ini /etc/php5/conf.d/10-opcache.ini
-
-# don't enable the pecl extension by default
-#ln -sf /vagrant/geoip.ini /etc/php5/conf.d/10-geoip.ini
 
 # restart apache
 service apache2 restart
