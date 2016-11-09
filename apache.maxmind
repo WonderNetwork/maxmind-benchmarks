@@ -1,0 +1,20 @@
+<VirtualHost *:80>
+    DocumentRoot /vagrant
+    ServerName apache.maxmind
+    
+    php_value display_errors "1"
+    php_value error_reporting -1
+
+    <IfModule mod_geoip.c>
+        GeoIPEnable On
+        GeoIPDBFile /usr/share/GeoIP/GeoIP.dat
+        GeoIPScanProxyHeaders On
+    </IfModule>
+
+    <Directory /vagrant>
+        Order Allow,Deny
+        Allow from all
+
+        DirectoryIndex apache.php
+    </Directory>
+</VirtualHost>

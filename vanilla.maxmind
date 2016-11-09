@@ -1,0 +1,18 @@
+<VirtualHost *:80>
+    DocumentRoot /vagrant
+    ServerName vanilla.maxmind
+    
+    php_value display_errors "1"
+    php_value error_reporting -1
+
+    <IfModule mod_geoip.c>
+        GeoIPEnable Off
+    </IfModule>
+
+    <Directory /vagrant>
+        Order Allow,Deny
+        Allow from all
+
+        DirectoryIndex vanilla.php
+    </Directory>
+</VirtualHost>
